@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	pb "git.local/go-app/model"
+	pb "git.local/go-app/models"
 )
 
 type OrderDB interface {

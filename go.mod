@@ -12,9 +12,11 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/jackc/pgproto3/v2 v2.1.0 // indirect
 	github.com/jackc/pgx/v4 v4.11.0
+	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ugorji/go v1.2.6 // indirect

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -10,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	pb "git.local/go-app/model"
+	pb "git.local/go-app/models"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 )
@@ -18,6 +19,10 @@ import (
 var sampleapp *Sampleapp
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	sampleapp = NewSampleapp()
 	app := cli.NewApp()
 	app.Commands = []cli.Command{
@@ -30,7 +35,7 @@ func main() {
 }
 
 func daemon(ctx *cli.Context) {
-	go func() { http.ListenAndServe("localhost:6060", nil) }()
+	go func() { http.ListenAndServe("localhost:9002", nil) }()
 	sampleapp.BatchAsync()
 	go sampleapp.ServeGrpc()
 	sampleapp.ServeHTTP()

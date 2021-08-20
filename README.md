@@ -29,6 +29,12 @@ PostgreSQL:
 ```console
 $ sudo su -postgres
 $ psql -c "ALTER USER username WITH PASSWORD 'password'"
+Host ec2-54-155-87-214.eu-west-1.compute.amazonaws.com
+Database da68o0fj793pmp
+User insmupyztsitvc
+Port 5432
+Password 3127f44315711f9f4f0dcfaf6212bf7580c6ae47e94b091980b685a595515b88
+URI postgres://insmupyztsitvc:3127f44315711f9f4f0dcfaf6212bf7580c6ae47e94b091980b685a595515b88@ec2-54-155-87-214.eu-west-1.compute.amazonaws.com:5432/da68o0fj793pmp
 ```
 
 Run the server:
