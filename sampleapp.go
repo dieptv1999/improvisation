@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	pb "git.local/go-app/models"
@@ -14,7 +13,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -178,20 +176,21 @@ func (app *Sampleapp) ServeHTTP() {
 			"data":  string(jsonPessoal),
 		})
 	})
-	x509, errTls := tls.LoadX509KeyPair(os.Getenv("SSLCRT"), os.Getenv("SSLKEY"))
-	if errTls != nil {
-		fmt.Println(errTls)
-	}
-	fmt.Println(os.Getenv("SSLCRT"), "SSLKEY")
-	var server *http.Server
-	server = &http.Server{
-		Addr:    app.Cf.HTTPPort,
-		Handler: r,
-		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{x509},
-		},
-	}
-	server.ListenAndServeTLS("", "")
+	//x509, errTls := tls.LoadX509KeyPair(os.Getenv("SSLCRT"), os.Getenv("SSLKEY"))
+	//if errTls != nil {
+	//	fmt.Println(errTls)
+	//}
+	//fmt.Println(os.Getenv("SSLCRT"), "SSLKEY")
+	//var server *http.Server
+	//server = &http.Server{
+	//	Addr:    app.Cf.HTTPPort,
+	//	Handler: r,
+	//	TLSConfig: &tls.Config{
+	//		Certificates: []tls.Certificate{x509},
+	//	},
+	//}
+	//server.ListenAndServeTLS("", "")
+	r.Run()
 }
 
 func (app *Sampleapp) BatchAsync() chan struct{} {

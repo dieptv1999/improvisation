@@ -37,7 +37,7 @@ func main() {
 func daemon(ctx *cli.Context) {
 	go func() { http.ListenAndServe("localhost:9002", nil) }()
 	sampleapp.BatchAsync()
-	go sampleapp.ServeGrpc()
+	//go sampleapp.ServeGrpc()
 	sampleapp.ServeHTTP()
 }
 
