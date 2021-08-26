@@ -4,12 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	pb "git.local/go-app/models"
-	"git.local/go-app/repository"
-	"git.local/go-app/services"
-	"github.com/gin-gonic/gin"
-	"github.com/kelseyhightower/envconfig"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"net/http"
@@ -17,6 +11,13 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	pb "git.local/go-app/models"
+	"git.local/go-app/repository"
+	"git.local/go-app/services"
+	"github.com/gin-gonic/gin"
+	"github.com/kelseyhightower/envconfig"
+	"google.golang.org/grpc"
 )
 
 type Config struct {
@@ -56,10 +57,33 @@ func (app *Sampleapp) ServeHTTP() {
 	r.GET("/songs", func(c *gin.Context) {
 		db := repository.NewPostgreSQLDB()
 		query := ""
+		page := 0
+		size := 5
 		if c.Query("query") != "" {
 			query = c.Query("query")
 		}
-		resp, err := db.ListSong(query)
+
+		if c.Query("page") != "" {
+			i, err := strconv.Atoi(c.Query("page"))
+			if err != nil {
+				c.JSON(
+					422,
+					"Params error",
+				)
+			}
+			page = i
+		}
+		if c.Query("size") != "" {
+			iSize, errSize := strconv.Atoi(c.Query("size"))
+			if errSize != nil {
+				c.JSON(
+					422,
+					"Params error",
+				)
+			}
+			size = iSize
+		}
+		resp, err := db.ListSong(query, page, size)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -150,30 +174,52 @@ func (app *Sampleapp) ServeHTTP() {
 		})
 	})
 
-	r.POST("/user", func(c *gin.Context) {
-		data := pb.Account{
-			Link: "aaa",
-			Pic:  "https://image.shutterstock.com/image-photo/miniature-greenhouse-concept-alone-mini-260nw-1176115702.jpg",
-			Type: "11",
-			Name: "Nhạc nhẹ",
+	// r.POST("/user", func(c *gin.Context) {
+	// 	data := pb.Account{
+	// 		Link: "aaa",
+	// 		Pic:  "https://image.shutterstock.com/image-photo/miniature-greenhouse-concept-alone-mini-260nw-1176115702.jpg",
+	// 		Type: "11",
+	// 		Name: "Nhạc nhẹ",
+	// 	}
+
+	// 	data1 := pb.Account{
+	// 		Link: "aaa",
+	// 		Pic:  "https://image.shutterstock.com/image-photo/miniature-greenhouse-concept-alone-mini-260nw-1176115702.jpg",
+	// 		Type: "111111111111 ffff",
+	// 		Name: "Tuyển tập nhạc của trần điệp",
+	// 	}
+	// 	resp := [5]pb.Account{data, data1, data, data, data}
+	// 	fmt.Println(resp)
+	// 	jsonPessoal, errr := json.Marshal(resp)
+	// 	if errr != nil {
+	// 		log.Fatal(errr)
+	// 	}
+	// 	c.JSON(200, gin.H{
+	// 		"code":  200,
+	// 		"error": "0",
+	// 		"data":  string(jsonPessoal),
+	// 	})
+	// })
+	r.POST("/customer/social_login", func(c *gin.Context) {
+		var data struct {
+			AccessToken string `json:"accessToken"`
+		}
+		c.BindJSON(&data)
+		info, errr := services.VerifyIdToken(string(data.AccessToken))
+		if errr != nil {
+			fmt.Println(errr)
+			c.JSON(401, gin.H{
+				"code":  401,
+				"error": errr,
+				"data":  "Token not found",
+			})
 		}
 
-		data1 := pb.Account{
-			Link: "aaa",
-			Pic:  "https://image.shutterstock.com/image-photo/miniature-greenhouse-concept-alone-mini-260nw-1176115702.jpg",
-			Type: "111111111111 ffff",
-			Name: "Tuyển tập nhạc của trần điệp",
-		}
-		resp := [5]pb.Account{data, data1, data, data, data}
-		fmt.Println(resp)
-		jsonPessoal, errr := json.Marshal(resp)
-		if errr != nil {
-			log.Fatal(errr)
-		}
+		fmt.Println(info)
 		c.JSON(200, gin.H{
 			"code":  200,
-			"error": "0",
-			"data":  string(jsonPessoal),
+			"error": "",
+			"data":  "",
 		})
 	})
 	//x509, errTls := tls.LoadX509KeyPair(os.Getenv("SSLCRT"), os.Getenv("SSLKEY"))

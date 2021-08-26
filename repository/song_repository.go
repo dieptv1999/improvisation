@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
+	"time"
+
 	pb "git.local/go-app/models"
 	"github.com/jackc/pgx/v4"
-	"os"
-	"time"
 )
 
 func (db *PostgreSQLDB) ReadSong(id int) (*pb.Song, error) {
@@ -36,9 +38,9 @@ func (db *PostgreSQLDB) InsertSong(Song *pb.Song) error {
 	return nil
 }
 
-func (db *PostgreSQLDB) ListSong(query string) ([]*pb.Song, error) {
-	rows, _ := db.conn.Query(context.Background(), "select id, link, title, author, lrc, url, pic, thumbnail, created_at from song where LOWER(title) like LOWER('%"+query+"%')")
-
+func (db *PostgreSQLDB) ListSong(query string, page int, size int) ([]*pb.Song, error) {
+	rows, _ := db.conn.Query(context.Background(), "select id, link, title, author, lrc, url, pic, thumbnail, created_at from song where LOWER(title) like LOWER('%"+query+"%') LIMIT "+strconv.Itoa(size)+" OFFSET "+strconv.Itoa(page*size))
+	fmt.Println("LIMIT " + strconv.Itoa(size) + " OFFSET " + strconv.Itoa(page*size))
 	var Songs []*pb.Song
 
 	for rows.Next() {

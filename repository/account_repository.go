@@ -3,30 +3,33 @@ package repository
 import (
 	"context"
 	"fmt"
+	"os"
+
 	pb "git.local/go-app/models"
 	"github.com/jackc/pgx/v4"
-	"os"
 )
 
 func (db *PostgreSQLDB) ReadAccount(id int) (*pb.Account, error) {
-	var name, email, pic string
-	var dateOfBirth, createdAt int64
-	err := db.conn.QueryRow(context.Background(), `SELECT name, email, date_of_birth, pic, created_at FROM account WHERE id=$1`, id).Scan(&name, &createdAt, &email, &pic, &dateOfBirth)
+	var photoURL, first_name, last_name, user_email, user_display_name string
+	var createdAt int64
+	var type_login int
+	err := db.conn.QueryRow(context.Background(), `SELECT photoURL, first_name, last_name, user_email, username, user_display_name, type_login, created_at FROM account WHERE id=$1`,
+		id).Scan(&photoURL, &first_name, &last_name, &user_email, &user_display_name, &type_login, &createdAt)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &pb.Account{Id: id, Name: name, Email: email, CreatedAt: createdAt, DateOfBirth: dateOfBirth}, nil
+	return &pb.Account{Id: id, PhotoURL: photoURL, FirstName: first_name, LastName: last_name, UserEmail: user_email, UserDisplayName: user_display_name, TypeLogin: type_login, CreatedAt: createdAt}, nil
 }
 
-func (db *PostgreSQLDB) InsertAccount(Account *pb.Account) error {
-	_,err := db.conn.Exec(context.Background(),`
-			INSERT INTO account(id, name, email, date_of_birth, pic)
-			VALUES(?, ?, ?, ?, ?)
+func (db *PostgreSQLDB) InsertAccount(account *pb.Account) error {
+	_, err := db.conn.Exec(context.Background(), `
+			INSERT INTO account(photoURL, first_name, last_name, user_email, username, user_display_name, type_login)
+			VALUES(?, ?, ?, ?, ?, ?, ?)
 			ON DUPLICATE KEY UPDATE created_at=VALUES(created_at)
-		`, Account.GetId(), Account.GetName(), Account.GetEmail(), Account.GetDateOfBirth(), Account.GetPic())
+		`, account.PhotoURL, account.FirstName, account.LastName, account.UserEmail, account.Username, account.UserDisplayName, account.TypeLogin)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to update task: %v\n", err)
@@ -41,13 +44,14 @@ func (db *PostgreSQLDB) ListAccount() ([]*pb.Account, error) {
 	var accounts []*pb.Account
 
 	for rows.Next() {
-		var name, email, pic string
-		var dateOfBirth, createdAt int64
-		err := rows.Scan(&name, &createdAt, &email, &pic, &dateOfBirth)
+		var photoURL, first_name, last_name, user_email, user_display_name string
+		var createdAt int64
+		var type_login, id int
+		err := rows.Scan(&id, &photoURL, &first_name, &last_name, &user_email, &user_display_name, &type_login, &createdAt)
 		if err != nil {
 			return nil, err
 		}
-		accounts = append(accounts, &pb.Account{Name: name, Email: email, CreatedAt: createdAt, DateOfBirth: dateOfBirth})
+		accounts = append(accounts, &pb.Account{Id: id, PhotoURL: photoURL, FirstName: first_name, LastName: last_name, UserEmail: user_email, UserDisplayName: user_display_name, TypeLogin: type_login, CreatedAt: createdAt})
 	}
 
 	return accounts, nil
